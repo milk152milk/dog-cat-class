@@ -4,10 +4,10 @@ from PIL import Image
 import numpy as np
 
 # Set page config
-st.set_page_config(page_title="Dog vs Cat Classifier", page_icon="🐾", layout="centered")
+st.set_page_config(page_title="강아지 vs 고양이 분류기", page_icon="🐾", layout="centered")
 
-st.title("🐾 Dog vs Cat Image Classifier")
-st.write("Upload an image of a dog or a cat, and the Xception model will predict which one it is!")
+st.title("🐾 강아지 vs 고양이 이미지 분류기")
+st.write("강아지나 고양이 사진을 업로드하면, 인공지능 모델이 이미지를 분석해 결과를 알려줍니다!")
 
 @st.cache_resource
 def load_classification_model():
@@ -17,24 +17,24 @@ def load_classification_model():
     return tf.keras.models.load_model('best_model_xception.keras')
 
 try:
-    with st.spinner("Loading model from disk..."):
+    with st.spinner("모델을 불러오는 중입니다..."):
         model = load_classification_model()
-    st.success("Model loaded successfully!")
+    st.success("모델 로드 완료!")
 except Exception as e:
-    st.error(f"Error loading model: {e}")
+    st.error(f"모델 로드 오류: {e}")
     st.stop()
 
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("이미지를 선택하세요...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     # Read the image
     image = Image.open(uploaded_file)
     
     # Display the image centered
-    st.image(image, caption='Uploaded Image', use_column_width=True)
+    st.image(image, caption='업로드된 이미지', use_column_width=True)
 
     st.write("---")
-    with st.spinner("Classifying image..."):
+    with st.spinner("이미지 분석 중..."):
         try:
             # Dynamically determine the target size based on model input shape
             input_shape = model.input_shape
@@ -69,20 +69,20 @@ if uploaded_file is not None:
         if prediction_shape_len == 1:
             probability = float(predictions[0][0])
             if probability > 0.5:
-                result = f"**🐶 Dog** (Confidence: {probability:.2%})"
+                result = f"**🐶 강아지** (확률: {probability:.2%})"
             else:
-                result = f"**🐱 Cat** (Confidence: {(1 - probability):.2%})"
+                result = f"**🐱 고양이** (확률: {(1 - probability):.2%})"
                 
         elif prediction_shape_len == 2:
             class_idx = np.argmax(predictions[0])
             probability = float(predictions[0][class_idx])
             if class_idx == 0:
-                result = f"**🐱 Cat** (Confidence: {probability:.2%})"
+                result = f"**🐱 고양이** (확률: {probability:.2%})"
             else:
-                result = f"**🐶 Dog** (Confidence: {probability:.2%})"
+                result = f"**🐶 강아지** (확률: {probability:.2%})"
         else:
-            result = f"Unknown model output format: {predictions.shape}. Raw: {predictions[0]}"
+            result = f"알 수 없는 모델 출력 형식입니다: {predictions.shape}. Raw: {predictions[0]}"
 
         # Display Result
-        st.subheader("Prediction Result")
+        st.subheader("예측 결과")
         st.info(result)
